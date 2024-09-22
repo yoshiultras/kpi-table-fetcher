@@ -35,13 +35,9 @@ class Database:
 
 # Пример использования
 if __name__ == "__main__":
-    connection = Database.get_connection()
-    cursor = connection.cursor()
-
-    # Выполнение SQL-запроса
-    cursor.execute("SELECT version();")
-    db_version = cursor.fetchone()
-    print("Вы подключены к - ", db_version)
-
-    cursor.close()
-    Database.close_connection()
+    with Database.get_connection() as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("""SELECT * FROM kpi_metrics""")
+            results = cursor.fetchall()
+            for row in results:
+                print(row)
