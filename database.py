@@ -13,11 +13,11 @@ class Database:
         if cls._connection is None:
             try:
                 cls._connection = psycopg2.connect(
-                    dbname=os.getenv('DB_NAME'),
-                    user=os.getenv('DB_USER'),
-                    password=os.getenv('DB_PASSWORD'),
-                    host=os.getenv('DB_HOST'),
-                    port=os.getenv('DB_PORT'),
+                    dbname=os.getenv("DB_NAME"),
+                    user=os.getenv("DB_USER"),
+                    password=os.getenv("DB_PASSWORD"),
+                    host=os.getenv("DB_HOST"),
+                    port=os.getenv("DB_PORT"),
                 )
                 print("Соединение с PostgreSQL установлено")
             except Exception as error:
@@ -37,7 +37,7 @@ class Database:
 if __name__ == "__main__":
     with Database.get_connection() as connection:
         with connection.cursor() as cursor:
-            cursor.execute("""SELECT * FROM kpi_metrics""")
+            cursor.execute("SELECT * FROM kpi_metrics")
             results = cursor.fetchall()
             for row in results:
                 print(row)
