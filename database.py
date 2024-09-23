@@ -31,13 +31,9 @@ class Database:
             cls._connection.close()
             print("Соединение с PostgreSQL закрыто")
             cls._connection = None
-
-
-# Пример использования
-if __name__ == "__main__":
-    with Database.get_connection() as connection:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM kpi_metrics")
-            results = cursor.fetchall()
-            for row in results:
-                print(row)
+    def get_metrics():
+        with Database.get_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM kpi_metrics")
+                results = cursor.fetchall()
+                return results
