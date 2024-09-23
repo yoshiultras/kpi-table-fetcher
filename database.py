@@ -33,7 +33,6 @@ class Database:
             cls._connection = None
 
 
-# Пример использования
 if __name__ == "__main__":
     with Database.get_connection() as connection:
         with connection.cursor() as cursor:
