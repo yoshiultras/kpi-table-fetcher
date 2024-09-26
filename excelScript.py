@@ -37,6 +37,7 @@ ws.column_dimensions['J'].width = 70
 ws.column_dimensions['K'].width = 15
 
 wb.save('example.xlsx')
+print("Файл успешно сохранен")
 
 
 
