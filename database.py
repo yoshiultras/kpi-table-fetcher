@@ -8,6 +8,26 @@ load_dotenv()
 class Database:
     _connection = None
 
+    # Все данные для отображения метрик в таблице
+    # section_id для определения под какую секцую записывать метрику
+    selectMetricsSQL = """SELECT metric_number, 
+                       metric_subnumber, 
+                       md.description, 
+                       unit_of_measurement, 
+                       base_level, 
+                       average_level, 
+                       goal_level, 
+                       measurement_frequency, 
+                       conditions, 
+                       notes, 
+                       points, 
+                       section_id 
+                       FROM metric_descriptions AS md 
+                       JOIN sections AS s ON md.section_id = s.id"""
+
+    # Данные для формирования секций таблицы
+    selectSectionsSQL = """SELECT id, description FROM sections;"""
+
     @classmethod
     def get_connection(cls):
         if cls._connection is None:
@@ -31,9 +51,19 @@ class Database:
             cls._connection.close()
             print("Соединение с PostgreSQL закрыто")
             cls._connection = None
-    def get_metrics():
+
+    @classmethod
+    def get_metrics(cls):
         with Database.get_connection() as connection:
             with connection.cursor() as cursor:
-                cursor.execute("SELECT * FROM kpi_metrics")
+                cursor.execute(cls.selectMetricsSQL)
+                results = cursor.fetchall()
+                return results
+
+    @classmethod
+    def get_sections(cls):
+        with Database.get_connection() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(cls.selectSectionsSQL)
                 results = cursor.fetchall()
                 return results
