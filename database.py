@@ -24,7 +24,7 @@ class Database:
                        section_id 
                        FROM metric_descriptions AS md 
                        JOIN sections AS s ON md.section_id = s.id 
-                       ORDER BY 1"""
+                       ORDER BY 1, 2"""
 
     # Данные для формирования секций таблицы
     selectSectionsSQL = """SELECT id, description FROM sections;"""
