@@ -15,8 +15,8 @@ def make_excel():
     sheet = wb['Метрики']
     ws = wb.active
     for row in range(len(data)):
-        for col in range(1, len(data[row])):
-            cell = sheet.cell(row=row + 1, column=col)
+        for col in range(len(data[row])):
+            cell = sheet.cell(row=row + 1, column=col+1)
             # Для пропуска записи в недоступную ячейку после слияния
             try:
                 cell.value = data[row][col]

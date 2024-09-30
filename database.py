@@ -23,7 +23,8 @@ class Database:
                        points, 
                        section_id 
                        FROM metric_descriptions AS md 
-                       JOIN sections AS s ON md.section_id = s.id"""
+                       JOIN sections AS s ON md.section_id = s.id 
+                       ORDER BY 1"""
 
     # Данные для формирования секций таблицы
     selectSectionsSQL = """SELECT id, description FROM sections;"""
