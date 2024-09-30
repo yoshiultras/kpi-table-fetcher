@@ -7,21 +7,32 @@ def set_border(ws, cell_range, need_to_thick, need_to_thick_up, need_to_thick_do
     thick = openpyxl.styles.Side(border_style="thick", color="000000")
     for row in ws[cell_range]:
         for cell in row:
-                cell.border = openpyxl.styles.Border(top=thin, left=thin, right=thin, bottom=thin)
+                if cell == row[len(row)-1]:
+                    cell.border = openpyxl.styles.Border(top=thin, left=thin, right=thick, bottom=thin)
+                    cell.fill = openpyxl.styles.PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid")
+                else:
+                    cell.border = openpyxl.styles.Border(top=thin, left=thin, right=thin, bottom=thin)
         if(len(need_to_thick) != 0):
             if row == ws[need_to_thick[0]]:
                 for cell in row:
-                    cell.border = openpyxl.styles.Border(top=thick, left=thick, right=thick, bottom=thick)
+                    cell.border = openpyxl.styles.Border(top=thick, left=thick, right=thick, bottom=thick)    
                 need_to_thick.pop(0)
         if(len(need_to_thick_up) != 0):
             if row == ws[need_to_thick_up[0]]:
                 for cell in row:
-                    cell.border = openpyxl.styles.Border(top=thick, left=thin, right=thin, bottom=thin)
+                    if cell == row[len(row)-1]:
+                        cell.border = openpyxl.styles.Border(top=thick, left=thin, right=thick, bottom=thin)
+                    else:
+                        cell.border = openpyxl.styles.Border(top=thick, left=thin, right=thin, bottom=thin)
                 need_to_thick_up.pop(0)
         if(len(need_to_thick_down) != 0):
             if row == ws[need_to_thick_down[0]]:
                 for cell in row:
-                    cell.border = openpyxl.styles.Border(top=thin, left=thin, right=thin, bottom=thick)
+                    if cell == row[len(row)-1]:
+                        cell.border = openpyxl.styles.Border(top=thin, left=thin, right=thick, bottom=thick)
+                    else:
+                        cell.border = openpyxl.styles.Border(top=thin, left=thin, right=thin, bottom=thick)
+                    
                 need_to_thick_down.pop(0)
         
             
@@ -125,8 +136,9 @@ def make_excel():
     ws.column_dimensions['K'].width = 15
     set_border(ws, 'A3:K'+str(curent_row-1), need_to_thick, need_to_thick_up, need_to_thick_down) 
 #Сохранение файла
-    wb.save('example.xlsx')
+    wb.save('Метрики.xlsx')
     print("Файл успешно сохранен")
-
+ 
+        
 
 make_excel()
