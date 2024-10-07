@@ -6,7 +6,6 @@ load_dotenv()
 
 
 class Database:
-    _connection = None
 
     # Все данные для отображения метрик в таблице
     # section_id для определения под какую секцую записывать метрику
@@ -28,6 +27,9 @@ class Database:
 
     # Данные для формирования секций таблицы
     selectSectionsSQL = """SELECT id, description FROM sections;"""
+
+    # Логика подключения к БД
+    _connection = None
 
     @classmethod
     def get_connection(cls):
@@ -53,6 +55,7 @@ class Database:
             print("Соединение с PostgreSQL закрыто")
             cls._connection = None
 
+    # Метод получения метрик
     @classmethod
     def get_metrics(cls):
         with Database.get_connection() as connection:
@@ -61,6 +64,7 @@ class Database:
                 results = cursor.fetchall()
                 return results
 
+    # Метод подключения групп
     @classmethod
     def get_sections(cls):
         with Database.get_connection() as connection:
