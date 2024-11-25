@@ -1,74 +1,93 @@
-import psycopg2
 import os
 from dotenv import load_dotenv
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.ext.declarative import declarative_base
 
 load_dotenv()
 
+# Определяем базовый класс для моделей
+Base = declarative_base()
+
+# Определяем модель для таблицы metrics
+class MetricDescription(Base):
+    __tablename__ = 'metric_descriptions'
+
+    metric_id = Column(Integer, primary_key=True)
+    metric_number = Column(Integer)
+    metric_subnumber = Column(Integer)
+    description = Column(String)
+    unit_of_measurement = Column(String)
+    base_level = Column(Integer)
+    average_level = Column(Integer)
+    goal_level = Column(Integer)
+    measurement_frequency = Column(String)
+    conditions = Column(String)
+    notes = Column(String)
+    points = Column(Integer)
+    section_id = Column(Integer, ForeignKey('sections.id'))
+
+    def to_array(self):
+        fields_order = [
+            'metric_number', 'metric_subnumber', 'description',
+            'unit_of_measurement', 'base_level', 'average_level',
+            'goal_level', 'measurement_frequency', 'conditions',
+            'notes', 'points', 'section_id'
+        ]
+        return [getattr(self, field) for field in fields_order]
+
+# Определяем модель для таблицы sections
+class Section(Base):
+    __tablename__ = 'sections'
+
+    id = Column(Integer, primary_key=True)
+    description = Column(String)
+
+    def to_array(self):
+        fields_order = ['id', 'description']
+        return [getattr(self, field) for field in fields_order]
 
 class Database:
-
-    # Все данные для отображения метрик в таблице
-    # section_id для определения под какую секцую записывать метрику
-    selectMetricsSQL = """SELECT metric_number, 
-                       metric_subnumber, 
-                       md.description, 
-                       unit_of_measurement, 
-                       base_level, 
-                       average_level, 
-                       goal_level, 
-                       measurement_frequency, 
-                       conditions, 
-                       notes, 
-                       points, 
-                       section_id 
-                       FROM metric_descriptions AS md 
-                       JOIN sections AS s ON md.section_id = s.id 
-                       ORDER BY 1, 2"""
-
-    # Данные для формирования секций таблицы
-    selectSectionsSQL = """SELECT id, description FROM sections;"""
-
     # Логика подключения к БД
-    _connection = None
+    _engine = None
+    _session = None
 
     @classmethod
-    def get_connection(cls):
-        if cls._connection is None:
+    def get_engine(cls):
+        if cls._engine is None:
             try:
-                cls._connection = psycopg2.connect(
-                    dbname=os.getenv("DB_NAME"),
-                    user=os.getenv("DB_USER"),
-                    password=os.getenv("DB_PASSWORD"),
-                    host=os.getenv("DB_HOST"),
-                    port=os.getenv("DB_PORT"),
+                cls._engine = create_engine(
+                    f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
                 )
                 print("Соединение с PostgreSQL установлено")
             except Exception as error:
                 print("Ошибка при подключении к PostgreSQL", error)
-                cls._connection = None
-        return cls._connection
+                cls._engine = None
+        return cls._engine
 
     @classmethod
-    def close_connection(cls):
-        if cls._connection:
-            cls._connection.close()
+    def get_session(cls):
+        if cls._session is None:
+            cls._session = sessionmaker(bind=cls.get_engine())()
+        return cls._session
+
+    @classmethod
+    def close_session(cls):
+        if cls._session:
+            cls._session.close()
             print("Соединение с PostgreSQL закрыто")
-            cls._connection = None
+            cls._session = None
 
     # Метод получения метрик
     @classmethod
     def get_metrics(cls):
-        with Database.get_connection() as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(cls.selectMetricsSQL)
-                results = cursor.fetchall()
-                return results
+        session = cls.get_session()
+        results = session.query(MetricDescription).order_by(MetricDescription.metric_number, MetricDescription.metric_subnumber).all()
+        return results
 
-    # Метод подключения групп
+    # Метод получения секций
     @classmethod
     def get_sections(cls):
-        with Database.get_connection() as connection:
-            with connection.cursor() as cursor:
-                cursor.execute(cls.selectSectionsSQL)
-                results = cursor.fetchall()
-                return results
+        session = cls.get_session()
+        results = session.query(Section).all()
+        return results

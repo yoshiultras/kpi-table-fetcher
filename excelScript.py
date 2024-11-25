@@ -57,7 +57,6 @@ class Table4:
         sheet = wb['Метрики']
         ws = wb.active
 
-
         sections = database.Database.get_sections()
         current_row = 5
         current_category = 0
@@ -68,35 +67,36 @@ class Table4:
         for row in range(len(data)):
 
             # Вставка категорий
-            if current_category != int(data[row][11]):
+            if current_category != int(data[row].section_id):
                 ws.insert_rows(current_row)
                 current_category += 1
-                sheet.cell(row=current_row, column=1).value = sections[current_category - 1][1]
-                sheet.cell(row=current_row, column=1).font = openpyxl.styles.Font(size= 4)
+                sheet.cell(row=current_row, column=1).value = sections[current_category - 1].description
+                sheet.cell(row=current_row, column=1).font = openpyxl.styles.Font(size=4)
                 ws.row_dimensions[current_row].height = 10
                 ws.merge_cells(start_column=1, start_row=current_row, end_column=11, end_row=current_row)
                 need_to_medium.append(str(current_row))
                 current_row += 1
 
+            formatted_data = data[row].to_array()
             # Заполнение строк
-            for col in range(len(data[row]) - 1):
+            for col in range(len(formatted_data) - 1):
                 cell = sheet.cell(row=current_row, column=col + 1)
                 cell.alignment = openpyxl.styles.Alignment(wrap_text=True, horizontal='center', vertical='center')
 
                 # Пропуска записи в недоступную ячейку после слияния
                 try:
-                    cell.value = data[row][col]
+                    cell.value = formatted_data[col]
                 except Exception as err:
                     continue
 
             # Слияние ячеек с номерам критериев
             if row + 1 < len(data):
-                if data[row][0] == data[row + 1][0]:
+                if formatted_data[0] == data[row+1].to_array()[0]:
                     counter += 1
                     if counter == 1:
                         need_to_medium_up.append(current_row)
                 else:
-                    if counter == 0 and data[row][1] is None:
+                    if counter == 0 and formatted_data[1] is None:
                         ws.merge_cells(start_row=current_row, start_column=1, end_row=current_row, end_column=2)
                     else:
                         ws.merge_cells(start_row=current_row - counter, start_column=1, end_row=current_row, end_column=1)
